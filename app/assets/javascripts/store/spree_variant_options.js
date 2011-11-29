@@ -60,7 +60,7 @@ var select_variant = function(variant) {
   $.event.trigger('variant_selected', [variant, options]);
 }
 
-var reset_variant = function() {
+var reset_variant = function(cleared) {
   $('li.vtmb').hide();
   $('li.tmb-all').show();
   
@@ -72,7 +72,7 @@ var reset_variant = function() {
   $("#main-image").data('selectedThumb', newImg);
   $("#main-image").data('selectedThumbId', thumb.attr('id'));
   
-  $.event.trigger('variant_reset');
+  $.event.trigger('variant_reset', [cleared]);
 }
 
 VARIANT_OPTIONS_UNSELECTED_TEXT = '(select)';
@@ -89,7 +89,7 @@ function VariantOptions(options, allow_backorders) {
     disable(divs.find('a.option-value').addClass('locked'));
     update();
     enable(parent.find('a.option-value'));
-    toggle();
+    toggle(true);
     $('.clear-option a.clear-button').hide().click(handle_clear);
   }
   
@@ -120,7 +120,7 @@ function VariantOptions(options, allow_backorders) {
   }
   
   function inventory(btns) {
-    var keys, variants, count = 0, selected = {};
+    var keys, variants, count = 0;
     var sels = $.map(divs.find('a.selected'), function(i) { return i.rel });    
     $.each(sels, function(key, value) {
       key = value.split('-');
@@ -148,7 +148,7 @@ function VariantOptions(options, allow_backorders) {
         $(element).addClass(count ? 'in-stock' : 'out-of-stock');        
       }
     });
-    $.event.trigger('inventory_updated', [variants]);
+    $.event.trigger('inventory_updated', [selection]);
   }
   
   function get_variant_objects(rels) {
@@ -206,7 +206,7 @@ function VariantOptions(options, allow_backorders) {
     }
   }
       
-  function toggle() {
+  function toggle(cleared) {
     if (variant) {
       $('#variant_id').val(variant.id);
       $('#product-price dd').html('<span class="price selling">' + variant.price + '</span>');
@@ -220,7 +220,7 @@ function VariantOptions(options, allow_backorders) {
       $('#variant_id').val('');
       $('button[type=submit]').attr('disabled', true).fadeTo(0, 0.5);
       $('#product-price dd').html('<span class="price selling unselected">' + VARIANT_OPTIONS_UNSELECTED_TEXT + '</span>');
-      reset_variant();
+      reset_variant(cleared);
     }    
   }
   
@@ -228,7 +228,7 @@ function VariantOptions(options, allow_backorders) {
     variant = null;
     update(i);
     enable(buttons.removeClass('selected').removeClass('locked').removeClass('unavailable'));
-    toggle();
+    toggle(true);
     parent.nextAll().each(function(index, element) {
       disable($(element).find('a.option-value').show().removeClass('in-stock out-of-stock').addClass('locked').unbind('click'));
       $(element).find('a.clear-button').hide();
